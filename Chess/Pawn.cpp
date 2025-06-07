@@ -7,6 +7,8 @@ Pawn::Pawn(Colour color, int row, int col)
 
 std::vector<std::pair<int, int>> Pawn::FindPossibleMoves() {
 
+	capturingMoves.clear();
+
 	std::vector<std::pair<int, int>> allPairs;
 	std::pair<int, int> pair;
 
@@ -36,11 +38,13 @@ std::vector<std::pair<int, int>> Pawn::FindPossibleMoves() {
 		//front right
 		if (col + 1 < 8 && row - 1 > 0) {
 			pair = make_pair(row - 1, col + 1);
+			capturingMoves.push_back(pair);
 			allPairs.push_back(pair);
 		}
 		//front left
 		if (col - 1 < 8 && row - 1 > 0) {
 			pair = make_pair(row - 1, col - 1);
+			capturingMoves.push_back(pair);
 			allPairs.push_back(pair);
 		}
 
@@ -65,12 +69,14 @@ std::vector<std::pair<int, int>> Pawn::FindPossibleMoves() {
 		//front right
 		if (col + 1 < 8 && row + 1 < 8) {
 			pair = make_pair(row + 1, col + 1);
+			capturingMoves.push_back(pair);
 			allPairs.push_back(pair);
 		}
 
 		//front left
 		if (col - 1 < 8 && row + 1 < 8) {
 			pair = make_pair(row + 1, col - 1);
+			capturingMoves.push_back(pair);
 			allPairs.push_back(pair);
 		}
 	}

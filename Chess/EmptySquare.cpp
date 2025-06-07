@@ -1,7 +1,7 @@
 #include "EmptySquare.h"
 
 EmptySquare::EmptySquare(int r, int c) 
-	:Piece(' ', Colour::WHITE, r, c) {
+	:Piece(' ', Colour::EMPTY, r, c) {
 
 }
 

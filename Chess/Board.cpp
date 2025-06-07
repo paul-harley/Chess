@@ -56,8 +56,10 @@ Board::Board() {
 				break;
 			default:
 				board[i][j] = std::make_unique<EmptySquare>(i, j);
-				if (i == 2 && j == 3)
-					board[i][j] = std::make_unique<Queen>(Colour::WHITE, i, j);
+				if (i == 2 && j == 4)
+					board[i][j] = std::make_unique<Pawn>(Colour::BLACK, i, j);
+				if (i == 3 && j == 3)
+					board[i][j] = std::make_unique<King>(Colour::WHITE, i, j);
 				break;
 			}
 
@@ -140,6 +142,17 @@ char Board::pieceDefaultLoaction(int i, int j) {
 
 void Board::makeMove(Piece* pieceMoving, int toRow, int toCol) {
 
+	//if piece is a rook or king, it can no longer castle after moving
+	Rook* rookPtr = dynamic_cast<Rook*>(pieceMoving);
+	if (rookPtr) {
+		rookPtr->hasMoved = true;
+	}
+
+	King* kingPtr = dynamic_cast<King*>(pieceMoving);
+	if (kingPtr) {
+		kingPtr->hasMoved = true;
+	}
+
 	int fromR = pieceMoving->row;
 	int fromC = pieceMoving->col;
 
@@ -148,6 +161,8 @@ void Board::makeMove(Piece* pieceMoving, int toRow, int toCol) {
 	board[toRow][toCol]->col = toCol;
 
 	board[fromR][fromC] = std::make_unique<EmptySquare>(fromR, fromC);
+
+	setCheckStatus();
 }
 
 char Board::typeOfPieceAtCords(int i, int j) {
@@ -235,6 +250,8 @@ std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j) {
 	}
 
 }
+
+#pragma region trimming moves
 
 
 std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
@@ -754,6 +771,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 
 }
 
+#pragma endregion
 
 
 std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr) {
@@ -779,4 +797,58 @@ std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pa
 	}
 
 	return trimmedPairs;
+}
+
+
+void Board::setCheckStatus() {
+
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			char pieceSymbol = typeOfPieceAtCords(i, j);
+			switch (pieceSymbol)
+			{
+			case ' ':
+				break;
+
+			//pawns are different because not all moves are capturing moves
+			case 'p': {
+				Piece* basePtr = board[i][j].get();
+				Pawn* pawnPtr = dynamic_cast<Pawn*>(basePtr);
+				pawnPtr->FindPossibleMoves();
+				movesIncludeACheck(pawnPtr->capturingMoves);
+				break;
+				}
+
+			//piece here needs its moves checked
+			//if a possible move includes a king, check status needs changed to in check
+			//if none found, set it to not in check
+			default: {
+				bool result;
+				result = movesIncludeACheck(possibleMovesAt(i, j));
+				if (result) {
+					cout << "(" << i << ", " << j << "), ";
+				}
+			}
+			
+			}
+		}
+	}
+}
+
+bool Board::movesIncludeACheck(std::vector<std::pair<int, int>> pairs) {
+
+	int numMoves = pairs.size();
+
+	for (int i = 0; i < numMoves; i++) {
+		Piece* basePtr = board[pairs.at(i).first][pairs.at(i).second].get();
+		
+		//capturing king is a possible move and is a check
+		King* kingPtr = dynamic_cast<King*>(basePtr);
+		if (kingPtr) {
+			cout << "CHECK";
+			return true;
+		}
+	}
+
+	return false;
 }

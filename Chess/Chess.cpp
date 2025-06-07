@@ -24,6 +24,7 @@ int main()
     char pieceChose = myBoard.typeOfPieceAtCords(row,col);
 
     printVecPair(myBoard.possibleMovesAt(4,1));
+    myBoard.setCheckStatus();
 
 }
 

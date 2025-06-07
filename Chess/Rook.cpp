@@ -3,6 +3,7 @@
 Rook::Rook(Colour color, int row, int col)
 	:Piece('r', color, row, col) {
 
+	hasMoved = false;
 }
 
 std::vector<std::pair<int, int>> Rook::FindPossibleMoves() {

@@ -3,7 +3,8 @@
 King::King(Colour color, int row, int col)
 	:Piece('k', color, row, col) {
 
-	movement = 1;
+	hasMoved = false;
+	inCheck = false;
 }
 
 std::vector<std::pair<int, int>> King::FindPossibleMoves() {

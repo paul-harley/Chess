@@ -20,6 +20,7 @@ public:
 	void makeMove(Piece* pieceMoving, int currentRow, int currentCol);
 	char typeOfPieceAtCords(int i, int j);
 	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j);
+	void setCheckStatus();
 
 
 	std::unique_ptr<Piece> board[8][8];
@@ -36,6 +37,7 @@ private:
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Queen* basePtr);
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(King* basePtr);
 
+	bool movesIncludeACheck(std::vector<std::pair<int, int>> pairs);
 
 	//TIME IN HERE AT SOME STAGE
 };

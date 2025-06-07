@@ -7,7 +7,8 @@ using namespace std;
 
 enum class Colour{
 	WHITE,
-	BLACK
+	BLACK,
+	EMPTY
 };
 
 

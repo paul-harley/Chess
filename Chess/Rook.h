@@ -10,6 +10,7 @@ public:
 
 
 	int movement;
+	bool hasMoved;
 
 };
 
