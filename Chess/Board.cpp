@@ -162,7 +162,7 @@ void Board::makeMove(Piece* pieceMoving, int toRow, int toCol) {
 
 	board[fromR][fromC] = std::make_unique<EmptySquare>(fromR, fromC);
 
-	setCheckStatus();
+	boardHasAcheck();
 }
 
 char Board::typeOfPieceAtCords(int i, int j) {
@@ -800,7 +800,7 @@ std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pa
 }
 
 
-void Board::setCheckStatus() {
+bool Board::boardHasAcheck() {
 
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
@@ -815,7 +815,11 @@ void Board::setCheckStatus() {
 				Piece* basePtr = board[i][j].get();
 				Pawn* pawnPtr = dynamic_cast<Pawn*>(basePtr);
 				pawnPtr->FindPossibleMoves();
-				movesIncludeACheck(pawnPtr->capturingMoves);
+				bool result = movesIncludeACheck(pawnPtr->capturingMoves);
+				if (result) {
+					cout << "(" << i << ", " << j << "), gave a check";
+					return true;
+				}
 				break;
 				}
 
@@ -826,13 +830,17 @@ void Board::setCheckStatus() {
 				bool result;
 				result = movesIncludeACheck(possibleMovesAt(i, j));
 				if (result) {
-					cout << "(" << i << ", " << j << "), ";
+					cout << "(" << i << ", " << j << "), gave a check";
+					return true;
 				}
 			}
 			
 			}
 		}
+
 	}
+
+	return false;
 }
 
 bool Board::movesIncludeACheck(std::vector<std::pair<int, int>> pairs) {
@@ -845,10 +853,55 @@ bool Board::movesIncludeACheck(std::vector<std::pair<int, int>> pairs) {
 		//capturing king is a possible move and is a check
 		King* kingPtr = dynamic_cast<King*>(basePtr);
 		if (kingPtr) {
+			kingPtr->inCheck = true;
 			cout << "CHECK";
 			return true;
 		}
 	}
 
 	return false;
+}
+
+
+
+//probably check for this while trimming moves down
+bool Board::isMovePinned(Piece* pieceMoving, int toRow, int toCol) {
+
+	//for each move, simulate the board if it happened
+	//if a check is found on the board the piece is pinned and cannot make that move
+
+	//saving key data before move is made to allow for its reversal
+
+	int fromR = pieceMoving->row;
+	int fromC = pieceMoving->col;
+
+	Piece* pieceCaptured = board[toRow][toCol].get(); // Get raw pointer from unique_ptr
+
+	board[toRow][toCol] = std::move(board[pieceMoving->row][pieceMoving->col]);
+	board[toRow][toCol]->row = toRow;
+	board[toRow][toCol]->col = toCol;
+
+	board[fromR][fromC] = std::make_unique<EmptySquare>(fromR, fromC);
+
+	//move needs reversed and cannot be added
+	if (boardHasAcheck() == true) {
+
+		//set piece moving back to original square
+		board[fromR][fromC] = std::move(board[toRow][toCol]);
+		board[fromR][fromC]->row = fromR;
+		board[fromR][fromC]->col = fromC;
+
+		//set the captured piece back to its orginal location
+
+
+		return true;
+	}
+
+	//move needs reversed but can be added to legal moves
+	else {
+
+
+		return false;
+	}
+
 }

@@ -17,10 +17,11 @@ public:
 	Board();
 
 	void printBoard();
-	void makeMove(Piece* pieceMoving, int currentRow, int currentCol);
+	void makeMove(Piece* pieceMoving, int toRow, int toCol);
 	char typeOfPieceAtCords(int i, int j);
 	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j);
-	void setCheckStatus();
+	bool boardHasAcheck();
+	bool isMovePinned(Piece* pieceMoving, int toRow, int toCol);
 
 
 	std::unique_ptr<Piece> board[8][8];
