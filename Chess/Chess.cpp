@@ -4,6 +4,7 @@
 
 void printVecPair(std::vector<std::pair<int, int>> myVec) {
 
+    cout << "Possible moves then" << endl;
     int size = myVec.size();
 
     for (int i = 0; i < size; i++) {
@@ -23,8 +24,7 @@ int main()
     int col = 0;
     char pieceChose = myBoard.typeOfPieceAtCords(row,col);
 
-    printVecPair(myBoard.possibleMovesAt(4,1));
-    myBoard.setCheckStatus();
+    printVecPair(myBoard.possibleMovesAt(4,2));
 
 }
 

@@ -19,7 +19,7 @@ public:
 	void printBoard();
 	void makeMove(Piece* pieceMoving, int toRow, int toCol);
 	char typeOfPieceAtCords(int i, int j);
-	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j);
+	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j, bool checkingPins = true);
 	bool boardHasAcheck();
 	bool isMovePinned(Piece* pieceMoving, int toRow, int toCol);
 
@@ -29,13 +29,13 @@ public:
 private:
 
 	char pieceDefaultLoaction(int i, int j);
-	std::vector<std::pair<int, int>> validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr);
+	std::vector<std::pair<int, int>> validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr, bool checkingPins);
 
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Pawn* basePtr); //returns current legal moves on the board
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Rook* basePtr);
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Knight* basePtr);
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Bishop* basePtr);
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Queen* basePtr);
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Rook* basePtr, bool checkingPins);
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Knight* basePtr, bool checkingPins);
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Bishop* basePtr, bool checkingPins);
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Queen* basePtr, bool checkingPins);
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(King* basePtr);
 
 	bool movesIncludeACheck(std::vector<std::pair<int, int>> pairs);

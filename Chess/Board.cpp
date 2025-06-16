@@ -56,10 +56,12 @@ Board::Board() {
 				break;
 			default:
 				board[i][j] = std::make_unique<EmptySquare>(i, j);
-				if (i == 2 && j == 4)
-					board[i][j] = std::make_unique<Pawn>(Colour::BLACK, i, j);
-				if (i == 3 && j == 3)
+				if (i == 3 && j == 1)
 					board[i][j] = std::make_unique<King>(Colour::WHITE, i, j);
+				if (i == 4 && j == 2)
+					board[i][j] = std::make_unique<Queen>(Colour::WHITE, i, j);
+				if (i == 5 && j == 3)
+					board[i][j] = std::make_unique<Bishop>(Colour::BLACK, i, j);
 				break;
 			}
 
@@ -162,7 +164,6 @@ void Board::makeMove(Piece* pieceMoving, int toRow, int toCol) {
 
 	board[fromR][fromC] = std::make_unique<EmptySquare>(fromR, fromC);
 
-	boardHasAcheck();
 }
 
 char Board::typeOfPieceAtCords(int i, int j) {
@@ -206,7 +207,7 @@ char Board::typeOfPieceAtCords(int i, int j) {
 }
 
 
-std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j) {
+std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j, bool checkingPins) {
 
 	char pieceSymbol = typeOfPieceAtCords(i, j);
 	Piece * basePtr = board[i][j].get(); // Get raw pointer from unique_ptr
@@ -220,22 +221,22 @@ std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j) {
 
 	case 'r': {
 		Rook* rookPtr = dynamic_cast<Rook*>(basePtr);
-		return trimPossiblePieceMoves(rookPtr);
+		return trimPossiblePieceMoves(rookPtr, checkingPins);
 	}
 
 	case 'n': {
 		Knight* knightPtr = dynamic_cast<Knight*>(basePtr);
-		return trimPossiblePieceMoves(knightPtr);
+		return trimPossiblePieceMoves(knightPtr, checkingPins);
 	}
 
 	case 'b': {
 		Bishop* bishopPtr = dynamic_cast<Bishop*>(basePtr);
-		return trimPossiblePieceMoves(bishopPtr);
+		return trimPossiblePieceMoves(bishopPtr, checkingPins);
 	}
 
 	case 'q': {
 		Queen* queenPtr = dynamic_cast<Queen*>(basePtr);
-		return trimPossiblePieceMoves(queenPtr);
+		return trimPossiblePieceMoves(queenPtr, checkingPins);
 	}
 
 	case 'k': {
@@ -254,7 +255,7 @@ std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j) {
 #pragma region trimming moves
 
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr, bool checkingPins) {
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> pairsBeingChecked;
@@ -280,13 +281,25 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
 		if (row >= 0) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(row, basePtr->col) == ' ') {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[row][basePtr->col]->colour != basePtr->colour) {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -307,13 +320,20 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
 		if (row < 8) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(row, basePtr->col) == ' ') {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[row][basePtr->col]->colour != basePtr->colour) {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -342,13 +362,25 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
 		if (col < 8) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(basePtr->row, col) == ' ') {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[basePtr->row][col]->colour != basePtr->colour) {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -369,13 +401,25 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
 		if (col >= 0) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(basePtr->row, col) == ' ') {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[basePtr->row][col]->colour != basePtr->colour) {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -393,7 +437,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Rook* basePtr) {
 
 }
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Knight* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Knight* basePtr, bool checkingPins) {
 
 	//knight can jump, so colour of any piece there is all needs checked
 
@@ -405,12 +449,14 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Knight* basePtr) 
 
 		//empty squre - can move
 		if (typeOfPieceAtCords(allPairs.at(i).first, allPairs.at(i).second) == ' ') {
-			trimmedPairs.push_back(allPairs.at(i));
+			if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false)
+				trimmedPairs.push_back(allPairs.at(i));
 		}
 
 		//different colour - can move
 		else if (board[allPairs.at(i).first][allPairs.at(i).second]->colour != basePtr->colour	) {
-			trimmedPairs.push_back(allPairs.at(i));
+			if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false)
+				trimmedPairs.push_back(allPairs.at(i));
 		}
 
 	}
@@ -480,7 +526,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(King* basePtr) {
 
 }
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr, bool checkingPins) {
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> trimmedPairs;
@@ -525,7 +571,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) 
 
 
 	//up right
-	upRightPairs = validMovesFromVector(upRightPairs, basePtr);
+	upRightPairs = validMovesFromVector(upRightPairs, basePtr, checkingPins);
 	numPairsToCheck = upRightPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -533,7 +579,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) 
 	}
 
 	//down right
-	downRightPairs = validMovesFromVector(downRightPairs, basePtr);
+	downRightPairs = validMovesFromVector(downRightPairs, basePtr, checkingPins);
 	numPairsToCheck = downRightPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -541,7 +587,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) 
 	}
 
 	//up left
-	upLeftPairs = validMovesFromVector(upLeftPairs, basePtr);
+	upLeftPairs = validMovesFromVector(upLeftPairs, basePtr, checkingPins);
 	numPairsToCheck = upLeftPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -550,7 +596,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) 
 
 	//down left
 
-	downLeftPairs = validMovesFromVector(downLeftPairs, basePtr);
+	downLeftPairs = validMovesFromVector(downLeftPairs, basePtr, checkingPins);
 	numPairsToCheck = downLeftPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -561,7 +607,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Bishop* basePtr) 
 
 }
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr, bool checkingPins) {
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> trimmedPairs;
@@ -587,13 +633,26 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 		if (row >= 0) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(row, basePtr->col) == ' ') {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[row][basePtr->col]->colour != basePtr->colour) {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -614,13 +673,25 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 		if (row < 8) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(row, basePtr->col) == ' ') {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[row][basePtr->col]->colour != basePtr->colour) {
-				pair = make_pair(row, basePtr->col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, row, basePtr->col) == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(row, basePtr->col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -649,13 +720,26 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 		if (col < 8) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(basePtr->row, col) == ' ') {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+
 			}
 			//opposite colour can add, but is the end
 			else if (board[basePtr->row][col]->colour != basePtr->colour) {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -676,13 +760,25 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 		if (col >= 0) {
 			//if empty square it is a valid move
 			if (typeOfPieceAtCords(basePtr->row, col) == ' ') {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 			}
 			//opposite colour can add, but is the end
 			else if (board[basePtr->row][col]->colour != basePtr->colour) {
-				pair = make_pair(basePtr->row, col);
-				trimmedPairs.push_back(pair);
+				if (checkingPins && isMovePinned(basePtr, basePtr->row, col) == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
+				else if (checkingPins == false) {
+					pair = make_pair(basePtr->row, col);
+					trimmedPairs.push_back(pair);
+				}
 				validMove = false;
 			}
 			//own colour piece blocking
@@ -735,7 +831,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 
 
 	//up right
-	upRightPairs = validMovesFromVector(upRightPairs, basePtr);
+	upRightPairs = validMovesFromVector(upRightPairs, basePtr, checkingPins);
 	numPairsToCheck = upRightPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -743,7 +839,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 	}
 
 	//down right
-	downRightPairs = validMovesFromVector(downRightPairs, basePtr);
+	downRightPairs = validMovesFromVector(downRightPairs, basePtr, checkingPins);
 	numPairsToCheck = downRightPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -751,7 +847,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 	}
 
 	//up left
-	upLeftPairs = validMovesFromVector(upLeftPairs, basePtr);
+	upLeftPairs = validMovesFromVector(upLeftPairs, basePtr, checkingPins);
 	numPairsToCheck = upLeftPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -760,7 +856,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 
 	//down left
 
-	downLeftPairs = validMovesFromVector(downLeftPairs, basePtr);
+	downLeftPairs = validMovesFromVector(downLeftPairs, basePtr, checkingPins);
 	numPairsToCheck = downLeftPairs.size();
 
 	for (int i = 0; i < numPairsToCheck; i++) {
@@ -771,10 +867,8 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Queen* basePtr) {
 
 }
 
-#pragma endregion
 
-
-std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr) {
+std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr, bool checkingPins) {
 	
 	std::vector<std::pair<int, int>> trimmedPairs;
 
@@ -783,12 +877,22 @@ std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pa
 
 		//square is empty
 		if (typeOfPieceAtCords(myPairs.at(i).first, myPairs.at(i).second) == ' ') {
-			trimmedPairs.push_back(myPairs.at(i));
+			if (checkingPins && isMovePinned(basePtr, myPairs.at(i).first, myPairs.at(i).second) == false) {
+				trimmedPairs.push_back(myPairs.at(i));
+			}
+			else if (checkingPins == false) {
+				trimmedPairs.push_back(myPairs.at(i));
+			}
 		}
 
 		//piece can be captured
 		else if (board[myPairs.at(i).first][myPairs.at(i).second]->colour != basePtr->colour) {
-			trimmedPairs.push_back(myPairs.at(i));
+			if (checkingPins && isMovePinned(basePtr, myPairs.at(i).first, myPairs.at(i).second) == false) {
+				trimmedPairs.push_back(myPairs.at(i));
+			}
+			else if (checkingPins == false) {
+				trimmedPairs.push_back(myPairs.at(i));
+			}
 			break;
 		}
 		else {
@@ -799,6 +903,7 @@ std::vector<std::pair<int, int>> Board::validMovesFromVector(std::vector<std::pa
 	return trimmedPairs;
 }
 
+#pragma endregion
 
 bool Board::boardHasAcheck() {
 
@@ -828,7 +933,7 @@ bool Board::boardHasAcheck() {
 			//if none found, set it to not in check
 			default: {
 				bool result;
-				result = movesIncludeACheck(possibleMovesAt(i, j));
+				result = movesIncludeACheck(possibleMovesAt(i, j, false));
 				if (result) {
 					cout << "(" << i << ", " << j << "), gave a check";
 					return true;
@@ -875,13 +980,16 @@ bool Board::isMovePinned(Piece* pieceMoving, int toRow, int toCol) {
 	int fromR = pieceMoving->row;
 	int fromC = pieceMoving->col;
 
-	Piece* pieceCaptured = board[toRow][toCol].get(); // Get raw pointer from unique_ptr
+	//saving piece captured so it can be replaced 
+	unique_ptr<Piece> pieceCaptured = std::move(board[toRow][toCol]);
 
 	board[toRow][toCol] = std::move(board[pieceMoving->row][pieceMoving->col]);
 	board[toRow][toCol]->row = toRow;
 	board[toRow][toCol]->col = toCol;
 
 	board[fromR][fromC] = std::make_unique<EmptySquare>(fromR, fromC);
+	std::cout << "...MOVE BEING TESTED..." << endl;
+	printBoard();
 
 	//move needs reversed and cannot be added
 	if (boardHasAcheck() == true) {
@@ -892,7 +1000,12 @@ bool Board::isMovePinned(Piece* pieceMoving, int toRow, int toCol) {
 		board[fromR][fromC]->col = fromC;
 
 		//set the captured piece back to its orginal location
+		board[toRow][toCol] = std::move(pieceCaptured);
+		board[toRow][toCol]->row = toRow;
+		board[toRow][toCol]->col = toCol;
 
+		std::cout << "...MOVE REVERSED..." << endl;
+		printBoard();
 
 		return true;
 	}
@@ -900,6 +1013,18 @@ bool Board::isMovePinned(Piece* pieceMoving, int toRow, int toCol) {
 	//move needs reversed but can be added to legal moves
 	else {
 
+		//set piece moving back to original square
+		board[fromR][fromC] = std::move(board[toRow][toCol]);
+		board[fromR][fromC]->row = fromR;
+		board[fromR][fromC]->col = fromC;
+
+		//set the captured piece back to its orginal location
+		board[toRow][toCol] = std::move(pieceCaptured);
+		board[toRow][toCol]->row = toRow;
+		board[toRow][toCol]->col = toCol;
+
+		std::cout << "...MOVE REVERSED..." << endl;
+		printBoard();
 
 		return false;
 	}
