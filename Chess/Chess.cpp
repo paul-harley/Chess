@@ -96,7 +96,7 @@ string spriteFileToDraw(Board& board, int row, int col) {
 
 }
 
-void drawBoard(sf::RenderWindow& window, Board& board) {
+void drawBoard(sf::RenderWindow& window, Board& board, int squareSize, int offSet) {
 
     sf::Color backgroundColour(173, 216, 230); // light blue
     sf::Color lightSquares(196, 164, 132); //light brown
@@ -105,15 +105,13 @@ void drawBoard(sf::RenderWindow& window, Board& board) {
 
     window.clear(backgroundColour);
 
-    int squareSize = 60;
-
     //add all squares
     //moves from top left to bottom right
     bool isWhite = true;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
 
-            sf::Vector2f currentPos{ static_cast<float>(squareSize * j + 60), static_cast<float>(squareSize * i + 60) };
+            sf::Vector2f currentPos{ static_cast<float>(squareSize * j + offSet), static_cast<float>(squareSize * i + offSet) };
 
             //drawing square background
             sf::RectangleShape shape(sf::Vector2f{ static_cast<float>(squareSize), static_cast<float>(squareSize)});
@@ -152,6 +150,26 @@ void drawBoard(sf::RenderWindow& window, Board& board) {
 }
 
 
+std::vector<std::pair<int, int>> movesFromSquareClicked(sf::RenderWindow& window, Board& board, int squareSize, int offSet) {
+
+    sf::Vector2i mousePix = sf::Mouse::getPosition(window);
+    sf::Vector2f mousePos = window.mapPixelToCoords(mousePix);
+
+    //cpp trucs to 0 so have to floor to deal with out of bounds in top and left border
+    int row = std::floor((mousePos.x - offSet) / squareSize);
+    int col = std::floor((mousePos.y - offSet) / squareSize);
+
+    std::vector<std::pair<int, int>> possibleMoves;
+
+
+    if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+        std::cout << " CLICKED AT! " << mousePos.x << ", " << mousePos.y << "row, col = " << row << "," << col << endl;
+        possibleMoves = board.possibleMovesAt(col, row);
+        printVecPair(possibleMoves);
+    }
+    return possibleMoves;
+}
+
 
 int main() {
 
@@ -159,7 +177,12 @@ int main() {
     Board myBoard = Board();
     myBoard.printBoard();
     sf::RenderWindow window(sf::VideoMode({ 600, 700 }), "CHESS!");
+    int squareSize = 60;
+    int offSet = 60;
 
+
+
+    drawBoard(window, myBoard, squareSize, offSet);
 
     while (window.isOpen())
     {
@@ -167,10 +190,11 @@ int main() {
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
+
+            if (event->is<sf::Event::MouseButtonPressed>()) {
+                movesFromSquareClicked(window, myBoard, squareSize, offSet);
+            }
         }
-
-        drawBoard(window, myBoard);
-
     }
 
 
