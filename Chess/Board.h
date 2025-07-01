@@ -22,7 +22,7 @@ public:
 	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j, bool checkingPins = true);
 	bool boardHasAcheck();
 	bool isMovePinned(Piece* pieceMoving, int toRow, int toCol);
-
+	bool validMove(std::vector<std::pair<int, int>> legalMoves, std::pair<int, int> moveToMake);
 
 	std::unique_ptr<Piece> board[8][8];
 

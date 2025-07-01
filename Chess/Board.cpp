@@ -1030,3 +1030,19 @@ bool Board::isMovePinned(Piece* pieceMoving, int toRow, int toCol) {
 	}
 
 }
+
+
+bool Board::validMove(std::vector<std::pair<int, int>> legalMoves, std::pair<int, int> moveToMake) {
+
+	int numLegalMoves = legalMoves.size();
+
+	for (int i = 0; i < numLegalMoves; i++) {
+
+		if (legalMoves.at(i).first == moveToMake.first && legalMoves.at(i).second == moveToMake.second) {
+			return true;
+		}
+	}
+
+	return false;
+
+}
