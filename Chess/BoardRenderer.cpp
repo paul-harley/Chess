@@ -11,12 +11,14 @@ BoardRenderer::BoardRenderer(int screenWidth, int screenHeight, int sqSize, int 
 
 void BoardRenderer::drawBoard(Board& board) {
 
+
     sf::Color backgroundColour(173, 216, 230); // light blue
     sf::Color lightSquares(196, 164, 132); //light brown
     sf::Color darkSquares(128, 101, 23); //oak
 
 
     window.clear(backgroundColour);
+    drawBoardCords();
 
     //add all squares
     //moves from top left to bottom right
@@ -58,6 +60,8 @@ void BoardRenderer::drawBoard(Board& board) {
     }
 
     window.display();
+
+
 
 
 }
@@ -155,12 +159,13 @@ std::vector<std::pair<int, int>> BoardRenderer::movesFromSquareClicked(Board& bo
         shape.setRadius(squareSize/2);
         shape.setFillColor(sf::Color::Transparent);
         shape.setOutlineColor(sf::Color::Red);
-        shape.setOutlineThickness(5);
+        shape.setOutlineThickness(2);
         shape.setPosition(currentPos);
         window.draw(shape);
     }
 
     window.display();
+
 
     return possibleMoves;
 }
@@ -177,4 +182,60 @@ std::pair<int, int> BoardRenderer::getSquareClicked() {
     std::pair myPair = make_pair(col, row);
 
     return myPair;
+}
+
+void BoardRenderer::drawBoardCords() {
+
+    const sf::Font font("Fonts/CoolveticaHvComp.otf");
+    unsigned int fontSize = 30;
+
+    sf::Text text(font, "1");
+    text.setCharacterSize(fontSize);
+    text.setStyle(sf::Text::Bold);
+    text.setFillColor(sf::Color::Black);
+
+    //TOP ROW
+    for (int i = 0; i < 8; i++) {
+
+        //ascii for a = 97
+
+        char letter = i + 97;
+        text.setString(letter);
+        sf::Vector2f currentPos = { static_cast<float>((i * squareSize) + (offSet * 1.4)), static_cast<float>(offSet*0.4) };
+        text.setPosition(currentPos);
+        window.draw(text);
+    }
+
+
+    //BOTTOM ROW
+    for (int i = 0; i < 8; i++) {
+
+        //ascii for a = 97
+
+        char letter = i + 97;
+        text.setString(letter);
+        sf::Vector2f currentPos = { static_cast<float>((i * squareSize) + (offSet * 1.4)), static_cast<float>(squareSize * 8 +  offSet) };
+        text.setPosition(currentPos);
+        window.draw(text);
+    }
+
+
+    //LEFT COL
+    for (int i = 0; i < 8; i++) {
+
+        text.setString(to_string(i + 1));
+        sf::Vector2f currentPos = { static_cast<float>(offSet * 0.7), static_cast<float>(squareSize * i + offSet*1.2) };
+        text.setPosition(currentPos);
+        window.draw(text);
+    }
+
+    //LEFT COL
+    for (int i = 0; i < 8; i++) {
+
+        text.setString(to_string(i + 1));
+        sf::Vector2f currentPos = { static_cast<float>(squareSize * 8 + offSet * 1.2), static_cast<float>(squareSize * i + offSet * 1.2) };
+        text.setPosition(currentPos);
+        window.draw(text);
+    }
+
 }

@@ -17,5 +17,6 @@ private:
 	int offSet;
 
 	string spriteFileToDraw(Board& board, int row, int col);
+	void drawBoardCords();
 
 };
