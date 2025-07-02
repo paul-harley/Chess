@@ -216,7 +216,7 @@ std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j, bool check
 	{
 	case 'p': {
 		Pawn* pawnPtr = dynamic_cast<Pawn*>(basePtr);
-		return trimPossiblePieceMoves(pawnPtr);
+		return trimPossiblePieceMoves(pawnPtr, checkingPins);
 	}
 
 	case 'r': {
@@ -241,7 +241,7 @@ std::vector<std::pair<int, int>> Board::possibleMovesAt(int i, int j, bool check
 
 	case 'k': {
 		King* kingPtr = dynamic_cast<King*>(basePtr);
-		return trimPossiblePieceMoves(kingPtr);
+		return trimPossiblePieceMoves(kingPtr, checkingPins);
 	}
 	//empty square
 	default: {
@@ -465,7 +465,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Knight* basePtr, 
 
 }
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr, bool checkingPins) {
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> trimmedPairs;
@@ -479,7 +479,13 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr) {
 		//pawns can only capture diagonally, so must be a different col
 		if (allPairs.at(i).second != basePtr->col) {
 			if (typeOfPieceAtCords(allPairs.at(i).first, allPairs.at(i).second) != ' ') {
-				trimmedPairs.push_back(allPairs.at(i));
+
+				//piece on diagonal is a different colour 
+				if (board[allPairs.at(i).first][allPairs.at(i).second]->colour != basePtr->colour) {
+					if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false) {
+						trimmedPairs.push_back(allPairs.at(i));
+					}
+				}
 			}		
 		}
 		//foward move
@@ -491,7 +497,9 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr) {
 				blockCheck = true;
 			}
 			if (blockCheck == false) {
-				trimmedPairs.push_back(allPairs.at(i));
+				if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false) {
+					trimmedPairs.push_back(allPairs.at(i));
+				}
 			}
 
 		}
@@ -501,7 +509,7 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr) {
 
 }
 
-std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(King* basePtr) {
+std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(King* basePtr, bool checkingPins) {
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> trimmedPairs;
@@ -513,11 +521,15 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(King* basePtr) {
 		//square is not empty
 		if (typeOfPieceAtCords(allPairs.at(i).first, allPairs.at(i).second) != ' ') {
 			if (board[allPairs.at(i).first][allPairs.at(i).first]->colour != basePtr->colour) {
-				trimmedPairs.push_back(allPairs.at(i));
+				if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false) {
+					trimmedPairs.push_back(allPairs.at(i));
+				}
 			}
 		}
 		else {
-			trimmedPairs.push_back(allPairs.at(i));
+			if (checkingPins && isMovePinned(basePtr, allPairs.at(i).first, allPairs.at(i).second) == false) {
+				trimmedPairs.push_back(allPairs.at(i));
+			}
 		}
 
 	}

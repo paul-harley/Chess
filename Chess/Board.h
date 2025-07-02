@@ -31,12 +31,12 @@ private:
 	char pieceDefaultLoaction(int i, int j);
 	std::vector<std::pair<int, int>> validMovesFromVector(std::vector<std::pair<int, int>> myPairs, Piece* basePtr, bool checkingPins);
 
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Pawn* basePtr); //returns current legal moves on the board
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Pawn* basePtr, bool checkingPins); //returns current legal moves on the board
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Rook* basePtr, bool checkingPins);
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Knight* basePtr, bool checkingPins);
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Bishop* basePtr, bool checkingPins);
 	std::vector<std::pair<int, int>> trimPossiblePieceMoves(Queen* basePtr, bool checkingPins);
-	std::vector<std::pair<int, int>> trimPossiblePieceMoves(King* basePtr);
+	std::vector<std::pair<int, int>> trimPossiblePieceMoves(King* basePtr, bool checkingPins);
 
 	bool movesIncludeACheck(std::vector<std::pair<int, int>> pairs);
 
