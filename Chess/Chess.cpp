@@ -65,18 +65,21 @@ int main() {
 
             if (event->is<sf::Event::MouseButtonPressed>()) {
 
-                br.drawBoard(myBoard);
+                //br.drawBoard(myBoard);
 
                 //user has not chose a piece to move yet
                 if (pieceSelected == false) {
                     firstSqrClicked = br.getSquareClicked();
-                    moves = br.movesFromSquareClicked(myBoard);
-                    printVecPair(moves);
-                    if (moves.size() > 0) {
-                        pieceSelected = true;
-                    }
-                    else {
-                        pieceSelected = false;
+                    if (myBoard.board[firstSqrClicked.first][firstSqrClicked.second]->colour == myBoard.getTurnColour()) {
+
+                        moves = br.movesFromSquareClicked(myBoard);
+                        printVecPair(moves);
+                        if (moves.size() > 0) {
+                            pieceSelected = true;
+                        }
+                        else {
+                            pieceSelected = false;
+                        }
                     }
                 }
                 else{

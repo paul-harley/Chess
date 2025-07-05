@@ -11,6 +11,15 @@ enum class Colour{
 	EMPTY
 };
 
+inline std::string toString(Colour colour) {
+	switch (colour) {
+	case Colour::WHITE: return "White";
+	case Colour::BLACK: return "Black";
+	default: return "Empty";
+	}
+}
+
+
 
 class Piece {
 public:
