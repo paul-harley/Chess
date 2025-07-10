@@ -22,7 +22,7 @@ public:
 	std::vector<std::pair<int, int>> possibleMovesAt(int i, int j, bool checkingPins = true);
 	Colour boardHasAcheck(); //general check on board for any checks, returns colour of piece in check, empty colour if no checks
 	bool boardHasAcheckPins(Colour pieceMovingCol); //checks for pin checks on own king
-	bool validMove(std::vector<std::pair<int, int>> legalMoves, std::pair<int, int> moveToMake);
+	bool validMove(std::vector<std::pair<int, int>> legalMoves, std::pair<int, int> moveToMake); //checks if move being attempted is a possible move
 
 	Colour getTurnColour();
 
@@ -47,6 +47,9 @@ private:
 	bool movesIncludeACheckPins(std::vector<std::pair<int, int>> pairs, Colour colourOfPieceChecked);
 	bool isMovePinned(Piece* pieceMoving, int toRow, int toCol);
 	bool legalKingMove(King* basePtr, std::pair<int, int> pair);
+	bool isKingChecked(Colour colour);
+	void setKingCheckFalse(Colour colour);
+	void setKingCheckTrue(Colour colour);
 
 	//TIME IN HERE AT SOME STAGE
 };
