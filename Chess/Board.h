@@ -51,5 +51,7 @@ private:
 	void setKingCheckFalse(Colour colour);
 	void setKingCheckTrue(Colour colour);
 
+	bool isCheckMate(Colour losingColour);
+
 	//TIME IN HERE AT SOME STAGE
 };

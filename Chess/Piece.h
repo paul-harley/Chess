@@ -11,10 +11,33 @@ enum class Colour{
 	EMPTY
 };
 
+enum class PieceType {
+	PAWN,
+	ROOK,
+	KNIGHT,
+	BISHOP,
+	QUEEN,
+	KING,
+	EMPTY
+};
+
 inline std::string toString(Colour colour) {
 	switch (colour) {
 	case Colour::WHITE: return "White";
 	case Colour::BLACK: return "Black";
+	default: return "Empty";
+	}
+}
+
+inline std::string toString(PieceType piece) {
+	switch (piece) {
+	case PieceType::PAWN: return "Pawn";
+	case PieceType::ROOK: return "Rook";
+	case PieceType::KNIGHT: return "Knight";
+	case PieceType::BISHOP: return "Bishop";
+	case PieceType::QUEEN: return "Queen";
+	case PieceType::KING: return "King";
+	case PieceType::EMPTY: return "Empty Square";
 	default: return "Empty";
 	}
 }
@@ -37,6 +60,7 @@ public:
 
 protected: 
 	char symbol;
+	PieceType pieceType;
 	int value;
 
 	void setValue(char sym);
