@@ -52,6 +52,7 @@ private:
 	void setKingCheckTrue(Colour colour);
 
 	bool isCheckMate(Colour losingColour);
+	bool isStaleMate(Colour colourCannotMove);
 
 	//TIME IN HERE AT SOME STAGE
 };

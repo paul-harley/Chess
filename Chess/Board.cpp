@@ -58,6 +58,8 @@ Board::Board() {
 				break;
 			default:
 				board[i][j] = std::make_unique<EmptySquare>(i, j);
+				if (i == 1 && j == 5)
+					board[i][j] = std::make_unique<EmptySquare>(i, j);
 				if (i == 3 && j == 5)
 					board[i][j] = std::make_unique<Pawn>(Colour::BLACK, i, j);
 				if (i == 3 && j == 7)
@@ -178,9 +180,9 @@ void Board::makeMove(Piece* pieceMoving, int toRow, int toCol) {
 	if (isCheckMate(currentTurnColour)) {
 		std::cout << "CHECKMATE";
 	}
-	else
-	{
-		std::cout << "KEEP GOING";
+
+	if (isStaleMate(currentTurnColour)) {
+		std::cout << "STALEMATE";
 	}
 
 }
@@ -527,10 +529,6 @@ std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Knight* basePtr, 
 }
 
 std::vector<std::pair<int, int>> Board::trimPossiblePieceMoves(Pawn* basePtr, bool checkingPins) {
-
-	if (basePtr->row == 3) {
-		std::cout << "STOP" << endl;
-	}
 
 	std::vector<std::pair<int, int>> allPairs = basePtr->FindPossibleMoves();
 	std::vector<std::pair<int, int>> trimmedPairs;
@@ -1334,6 +1332,27 @@ bool Board::legalKingMove(King* basePtr, std::pair<int, int> pair) {
 bool Board::isCheckMate(Colour losingColour) {
 
 	if (isKingChecked(losingColour)) {
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (board[i][j].get()->colour == losingColour) {
+					if (possibleMovesAt(i, j).size() > 0) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool Board::isStaleMate(Colour losingColour) {
+
+	if (isKingChecked(losingColour) == false) {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if (board[i][j].get()->colour == losingColour) {
